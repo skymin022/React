@@ -10,7 +10,7 @@ npm install
 npm run dev
 
 # React 프로젝트 생성 
-# create-vite 프로젝트 명 --template react
+# create-vite 프로젝트 명 --template react ## 이걸로 ㄱㄱ
 create-vite vite-react-project --template react
 
 # 프로젝트 이동 
