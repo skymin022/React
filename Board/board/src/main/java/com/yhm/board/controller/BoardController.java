@@ -1,4 +1,4 @@
-package com.aloha.todo.controller;
+package com.yhm.board.controller;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,26 +18,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.aloha.todo.domain.Pagination;
-import com.aloha.todo.domain.Todos;
-import com.aloha.todo.service.TodoService;
 import com.github.pagehelper.PageInfo;
+import com.yhm.board.domain.Boards;
+import com.yhm.board.domain.Pagination;
+import com.yhm.board.service.BoardService;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-// 다른 서버에서 자원을 허용 범위를 지정하는 어노테이션
-// "*" : 모든 도메인에 대하여 허용
 @CrossOrigin("*")
 @RestController
-@RequestMapping("/todos")
-public class TodoController {
+@RequestMapping("/boards")
+public class BoardController {
     
     @Autowired
-    private TodoService todoService;
-
-
-    // sp-crud
+    private BoardService boardService;
 
     
     @GetMapping()
@@ -47,12 +42,12 @@ public class TodoController {
         Pagination pagination
     ) {
         try {
-            PageInfo<Todos> pageInfo = todoService.list(page, size);
+            PageInfo<Boards> pageInfo = boardService.list(page, size);
             pagination.setPage(page);
             pagination.setSize(size);
             pagination.setTotal(pageInfo.getTotal());
             Map<String, Object> response = new HashMap<>();
-            List<Todos> list = pageInfo.getList();
+            List<Boards> list = pageInfo.getList();
             response.put("list", list);
             response.put("pagination", pagination);
             return new ResponseEntity<>(response, HttpStatus.OK);
@@ -64,20 +59,20 @@ public class TodoController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getOne(@PathVariable("id") String id) {
         try {
-            Todos todo = todoService.selectById(id);
-            if ( id == null || todo == null) {
+            Boards board = boardService.selectById(id);
+            if ( id == null || board == null) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
-            return new ResponseEntity<>(todo, HttpStatus.OK);
+            return new ResponseEntity<>(board, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     
     @PostMapping()
-    public ResponseEntity<?> create(@RequestBody Todos todo) {
+    public ResponseEntity<?> create(@RequestBody Boards board) {
         try {
-            boolean result = todoService.insert(todo);
+            boolean result = boardService.insert(board);
             if ( result ) 
                 return new ResponseEntity<>("SUCCESS",HttpStatus.CREATED);
             else
@@ -88,9 +83,9 @@ public class TodoController {
     }
     
     @PutMapping()
-    public ResponseEntity<?> update(@RequestBody Todos todo) {
+    public ResponseEntity<?> update(@RequestBody Boards board) {
         try {
-            boolean result = todoService.updateById(todo);
+            boolean result = boardService.updateById(board);
             if ( result ) 
                 return new ResponseEntity<>("SUCCESS",HttpStatus.OK);
             else
@@ -103,7 +98,7 @@ public class TodoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> destroy(@PathVariable("id") String id) {
         try {
-           boolean result = todoService.deleteById(id);
+           boolean result = boardService.deleteById(id);
             if ( result ) 
                 return new ResponseEntity<>("SUCCESS",HttpStatus.OK);
             else
@@ -113,31 +108,31 @@ public class TodoController {
         }
     }
 
-    //  전체 삭제
-    @DeleteMapping("/all")
-    public ResponseEntity<?> deleteAll() {
-        try {
-           boolean result = todoService.deleteAll();
-            if ( result ) 
-                return new ResponseEntity<>("SUCCESS",HttpStatus.OK);
-            else
-                return new ResponseEntity<>("FAIL", HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+    // //  전체 삭제
+    // @DeleteMapping("/all")
+    // public ResponseEntity<?> deleteAll() {
+    //     try {
+    //        boolean result = boardService.deleteAll();
+    //         if ( result ) 
+    //             return new ResponseEntity<>("SUCCESS",HttpStatus.OK);
+    //         else
+    //             return new ResponseEntity<>("FAIL", HttpStatus.BAD_REQUEST);
+    //     } catch (Exception e) {
+    //         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    //     }
+    // }
 
-    // 전체 완료 
-    @PutMapping("/all")
-    public ResponseEntity<?> completeAll() { 
-        try {
-            boolean result = todoService.completeAll();
-            if ( result ) 
-                return new ResponseEntity<>("SUCCESS",HttpStatus.OK);
-            else
-                return new ResponseEntity<>("FAIL", HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
+    // // 전체 완료 
+    // @PutMapping("/all")
+    // public ResponseEntity<?> completeAll() { 
+    //     try {
+    //         boolean result = boardService.completeAll();
+    //         if ( result ) 
+    //             return new ResponseEntity<>("SUCCESS",HttpStatus.OK);
+    //         else
+    //             return new ResponseEntity<>("FAIL", HttpStatus.BAD_REQUEST);
+    //     } catch (Exception e) {
+    //         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    //     }
+    // }
 }
