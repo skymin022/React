@@ -1,7 +1,10 @@
 package com.yhm.board.domain;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import lombok.Data;
 
@@ -15,6 +18,13 @@ public class Boards {
     private String content;
     private Date createdAt;
     private Date updatedAt;
+
+    // 파일관련 
+    private MultipartFile mainFile;
+    private List<MultipartFile> files;
+
+    // 파일 정보
+    private Files file;
 
     public Boards() {
         this.id = UUID.randomUUID().toString();

@@ -4,27 +4,50 @@ import styles from './css/Insert.module.css'
 
 const Insert = ({onInsert}) => {
 
-
+  // state
   const [ title, setTitle ] = useState('')
   const [ writer, setWriter ] = useState('')
   const [ content, setContent ] = useState('')
+  const [ mainFile, setMainFile ] = useState(null)
+  const [ files, setFiles ] = useState([])
+
+
+
 
   // 변경 이벤트 함수 
   const changeTitle = (e) => { setTitle(e.target.value)}
   const changeWriter = (e) => { setWriter(e.target.value)}
   const changeContent = (e) => { setContent(e.target.value)}
+  const changeMainFile = (e) => { setMainFile(e.target.files[0])}
+  const changeFiles = (e) => {  setFiles(e.target.files)}
+  // 
 
   // 게시글 등록 함수 
   const onSumbit = () => { 
-    const data = { 
-      'title' : title,
-      'writer' : writer,
-      'content' : content
+    // application/json
+    // const data = { 
+    //   'title' : title,
+    //   'writer' : writer,
+    //   'content' : content
+    // }
+
+    // multipart/form-data
+    const formData = new FormData()
+    formData.append('title', title)
+    formData.append('writer', writer)
+    formData.append('content', content)
+    // 파일 데이터 세팅 
+    if ( mainFile) formData.append('mainFile', mainFile)
+    if( files ) { 
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        formData.append("files", file)
+      }
     }
-    const headers = { 'Content-Type' : 'application/json' }
+    const headers = { 'Content-Type' : 'multipart/form-data' }
 
     // TODO : onInsert() 전달 받아서 호출 
-    onInsert(data, headers)
+    onInsert(formData, headers)
   }
 
   return (
@@ -59,6 +82,18 @@ const Insert = ({onInsert}) => {
                   onChange={changeContent}
                   className={styles['form-input']}
                 ></textarea>
+              </td>
+            </tr>
+            <tr>
+              <td>메인 파일</td>
+              <td>
+                <input type="file" onChange={changeMainFile} />
+              </td>
+            </tr>
+            <tr>
+              <td>첨부 파일</td>
+              <td>
+                <input type="file" onChange={changeFiles} multiple />
               </td>
             </tr>
           </tbody>

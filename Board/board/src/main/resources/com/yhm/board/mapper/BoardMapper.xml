@@ -5,9 +5,33 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <!-- namespace="매퍼 인터페이스 경로" --> 
 <mapper namespace="com.yhm.board.mapper.BoardMapper">
 
-    <select id="list" resultType="boards">
+    <!-- TODO : board Map -->
+    <resultMap type="boards" id="BoardMap">
+        <id property="no" column="no" />
+        <result property="no" column="no" />
+        <result property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="writer" column="writer" />
+        <result property="content" column="content" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+
+        <association property="file" column="no" javaType="Files" select="selectMainfile"></association>
+    </resultMap>
+
+    <!-- 메인(썸네일) 파일 조회 -->
+    <select id="selectMainfile" resultType="Files">
         SELECT *
-        FROM boards
+        FROM files
+        WHERE p_no = #{no}
+            AND p_table = 'boards'
+            AND TYPE = 'MAIN'
+    </select>
+
+
+    <select id="list" resultMap="BoardMap">
+        SELECT *
+        FROM boards 
     </select>
 
     <!-- 🟡 페이징 처리 후 정렬을 적용 -->
@@ -25,12 +49,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         WHERE id = #{id}
     </select>
 
-    <insert id="insert">
+    <insert id="insert" useGeneratedKeys="true" keyProperty="no">
         INSERT INTO boards(id, title,writer, content )
         VALUES ( #{id}, #{title}, #{writer}, #{content} )
     </insert>
-
-
+ 
     <update id="update">
         UPDATE boards
         <set>

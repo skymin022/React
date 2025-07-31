@@ -2,7 +2,14 @@ import React from 'react'
 import { Link, useParams } from 'react-router-dom'
 import styles from './css/Read.module.css'
 
-const Read = ({board}) => {
+const Read = ({board, fileList, onDownload}) => {
+  
+
+  // const fileList = [
+  //   {id:'id1', originName:'파일명1', type:'MAIN', fileSize:'10028'},
+  //   {id:'id2', originName:'파일명2', type:'MAIN', fileSize:'2028'},
+  //   {id:'id3', originName:'파일명3', type:'MAIN', fileSize:'4028'},
+  // ]
 
   // id 수정에 넘기기 위한 값 저장 
   const { id } = useParams() 
@@ -50,6 +57,26 @@ const Read = ({board}) => {
                   defaultValue={board.content ?? ''}
                   className={styles['form-input']} readOnly
                 ></textarea>
+              </td>
+            </tr>
+            <tr>
+              <td colSpan={2}>
+                { 
+                  fileList.map( (file) => (
+                    <div className="flex-box" key={file.id}>
+                      <div className="item">
+                        <div className="item-img">
+                          { file.type == 'MAIN' && <span className='badge'>대표</span> }
+                          <img src={`/api/files/img/${file.id}`} alt={file.originName} className='file-img'/>
+                        </div>
+                        <span>{file.originName} ({file.fileSize})</span>
+                      </div>
+                      <div className="item">
+                        <button className='btn' onClick={ () => onDownload(file.id, file.originName)}>다운로드</button>
+                      </div>
+                    </div>
+                  ))
+                }
               </td>
             </tr>
           </tbody>

@@ -12,3 +12,5 @@ export const insert = (data, headers) => axios.post('/boards', data, headers)
 export const update = (data, headers) => axios.put('/boards', data, headers)
 // 삭제
 export const remove = (id) => axios.delete(`/boards/${id}`)
+
+
