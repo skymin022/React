@@ -8,3 +8,5 @@ export const remove = (id) => axios.delete(`/files/${id}`)
 export const removeFiles = (idList) => axios.delete(`/files?idList=${idList}`)
 // 타입별 파일 목록
 export const fileByType = (pTable, pNo, type) => axios.get(`/files/${pTable}/${pNo}?type=${type}`)
+// 파일 업로드 
+export const upload = (data, headers) => axios.post('/files', data, headers)

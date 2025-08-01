@@ -4,6 +4,11 @@ import styles from './css/Update.module.css'
 import DownloadIcon from '@mui/icons-material/Download';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import Checkbox from '@mui/material/Checkbox';
+// ckeditor5
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+// api
+import * as fileAPI from '../../apis/files'
 
 const Update = ({board,fileList, onUpdate, onDelete, onDownload, onDeleteFile, deleteCheckedFiles}) => {
 
@@ -13,7 +18,7 @@ const Update = ({board,fileList, onUpdate, onDelete, onDownload, onDeleteFile, d
   const [content, setContent] = useState('')
   const [fileIdList, setFileIdList] = useState([]) // 선택 삭제 id 목록
   const [mainFile, setMainFile] = useState(null)   // 
-  const [files, setFiles] = useState([])
+  const [files, setFiles] = useState(null)
 
   //FeState(second)
   // 변경 이벤트 함수 
@@ -63,35 +68,76 @@ const Update = ({board,fileList, onUpdate, onDelete, onDownload, onDeleteFile, d
     }
   }
 
-  // 체크박스 파일 선택 핸들러 
-  const checkFileId = (id) => { 
+  // ✅ 파일 선택 핸들러
+  const checkFileId = (id) => {
     console.log(id);
 
-    let checked = false;
+    let checked = false
     // 체크 여부 확인
     for (let i = 0; i < fileIdList.length; i++) {
       const fileId = fileIdList[i];
-      // 체크 ✅ 되어 있으면 ➡ 체크박스 해제
-      if ( fileId == id )  { 
-        fileIdList.splice(i,1)
-        checked = true;
+      // 체크⭕ ➡ 체크박스 해제 🟩
+      if( fileId == id ) {
+        fileIdList.splice(i, 1)
+        checked = true
       }
-      // 체크가 ❌ 안되어 있으면 ➡ 체크 지정✅
-      if (!checked) {
-        fileIdList.push(id)
-      }
-      console.log(`체크한 아이디 : ${fileIdList}`);
-      setFileIdList(fileIdList)
     }
+
+    // 체크❌ ➡ 체크박스 지정 ✅
+    if( !checked ) {
+      fileIdList.push(id)
+    }
+    console.log(`체크한 아이디 : ${fileIdList}`);
+    setFileIdList(fileIdList)
   }
   // 파일 삭제
-  const handleFileDelete=(id) => { 
+  const handleFileDelete = (id) => { 
     const check = window.confirm('정말 삭제하시겠습니까?')
     if(check) { 
       onDeleteFile(id)
     }
   }
+ // 이미지 drag & drop 기능1
+  function uploadPlugin(editor) {
+    editor.plugins.get("FileRepository").createUploadAdapter = (loader) => {
+        return customUploadAdapter(loader);
+    };
+  } 
 
+  // 이미지 drag & drop 기능2
+  const customUploadAdapter = (loader) => {
+        return {
+          upload() {
+            return new Promise( (resolve, reject) => {
+              const formData = new FormData();
+              loader.file.then( async (file) => {
+                    console.log(file);
+                    formData.append("pTable", 'editor');
+                    formData.append("pNo", 0);
+                    formData.append("type", 'SUB');
+                    formData.append("data", file);  //파일 데이터
+
+                    const headers = {
+                        headers: {
+                            'Content-Type' : 'multipart/form-data',
+                        },
+                    };
+    
+                    let response = await fileAPI.upload(formData, headers);
+                    let data = await response.data;
+                    console.log(`data : ${data}`);
+                    
+
+                    // 이미지 렌더링
+                    await resolve({
+                        default: `http://localhost:8080/files/img/${data.id}`
+                    })
+                    
+              });
+            });
+          },
+        };
+    };
 
   return (
     <div className="container">
@@ -119,13 +165,56 @@ const Update = ({board,fileList, onUpdate, onDelete, onDownload, onDeleteFile, d
             </tr>
             <tr>
               <td colSpan={2}>
-                <textarea
+                {/* <textarea
                   cols={40}
                   rows={10}
                   value={content}
                   onChange={changeContent}
                   className={styles['form-input']}
-                ></textarea>
+                ></textarea> */}
+
+                <CKEditor
+                  editor={ ClassicEditor }
+                  config={{
+                      placeholder: "내용을 입력하세요.",
+                      toolbar: {
+                          items: [
+                              'undo', 'redo',
+                              '|', 'heading',
+                              '|', 'fontfamily', 'fontsize', 'fontColor', 'fontBackgroundColor',
+                              '|', 'bold', 'italic', 'strikethrough', 'subscript', 'superscript', 'code',
+                              '|', 'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent',
+                              '|', 'link', 'uploadImage', 'blockQuote', 'codeBlock',
+                              '|', 'mediaEmbed',
+                          ],
+                          shouldNotGroupWhenFull: false
+                      },
+                      editorConfig: {
+                          height: 500, // Set the desired height in pixels
+                      },
+                      alignment: {
+                          options: ['left', 'center', 'right', 'justify'],
+                      },
+                      
+                      extraPlugins: [uploadPlugin]            // 업로드 플러그인
+                  }}
+                  data={board.content}         // ⭐ 기존 컨텐츠 내용 입력 (HTML)
+                  onReady={ editor => {
+                      // You can store the "editor" and use when it is needed.
+                      console.log( 'Editor is ready to use!', editor );
+                  } }
+                  onChange={ ( event, editor ) => {
+                      const data = editor.getData();
+                      console.log( { event, editor, data } );
+                      setContent(data);
+                  } }
+                  onBlur={ ( event, editor ) => {
+                      console.log( 'Blur.', editor );
+                  } }
+                  onFocus={ ( event, editor ) => {
+                      console.log( 'Focus.', editor );
+                  } }
+                  />
               </td>
             </tr>
             <tr>

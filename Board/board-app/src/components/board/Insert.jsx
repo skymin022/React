@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import styles from './css/Insert.module.css'
+// ckeditor5
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+// api
+import * as fileAPI from '../../apis/files'
 
 const Insert = ({onInsert}) => {
 
@@ -46,9 +51,51 @@ const Insert = ({onInsert}) => {
     }
     const headers = { 'Content-Type' : 'multipart/form-data' }
 
-    // TODO : onInsert() 전달 받아서 호출 
     onInsert(formData, headers)
   }
+
+  // 이미지 drag & drop 기능1
+  function uploadPlugin(editor) {
+    editor.plugins.get("FileRepository").createUploadAdapter = (loader) => {
+        return customUploadAdapter(loader);
+    };
+  } 
+
+  // 이미지 drag & drop 기능2
+  const customUploadAdapter = (loader) => {
+        return {
+          upload() {
+            return new Promise( (resolve, reject) => {
+              const formData = new FormData();
+              loader.file.then( async (file) => {
+                    console.log(file);
+                    formData.append("pTable", 'editor');
+                    formData.append("pNo", 0);
+                    formData.append("type", 'SUB');
+                    formData.append("data", file);  //파일 데이터
+
+                    const headers = {
+                        headers: {
+                            'Content-Type' : 'multipart/form-data',
+                        },
+                    };
+    
+                    let response = await fileAPI.upload(formData, headers);
+                    let data = await response.data;
+                    let id = data.id;
+                    console.log(`data : ${data}`);
+                    
+
+										// 이미지 렌더링
+                    await resolve({
+                        default: `http://localhost:8080/files/img/${id}`
+                    })
+                    
+              });
+            });
+          },
+        };
+    };
 
   return (
     <div className={styles.container}>
@@ -76,12 +123,54 @@ const Insert = ({onInsert}) => {
             </tr>
             <tr>
               <td colSpan={2}>
-                <textarea
+                {/* <textarea
                   cols={40}
                   rows={10}
                   onChange={changeContent}
                   className={styles['form-input']}
-                ></textarea>
+                ></textarea> */}
+                <CKEditor
+                  editor={ ClassicEditor }
+                  config={{
+                      placeholder: "내용을 입력하세요.",
+                      toolbar: {
+                          items: [
+                              'undo', 'redo',
+                              '|', 'heading',
+                              '|', 'fontfamily', 'fontsize', 'fontColor', 'fontBackgroundColor',
+                              '|', 'bold', 'italic', 'strikethrough', 'subscript', 'superscript', 'code',
+                              '|', 'bulletedList', 'numberedList', 'todoList', 'outdent', 'indent',
+                              '|', 'link', 'uploadImage', 'blockQuote', 'codeBlock',
+                              '|', 'mediaEmbed',
+                          ],
+                          shouldNotGroupWhenFull: false
+                      },
+                      editorConfig: {
+                          height: 500, // Set the desired height in pixels
+                      },
+                      alignment: {
+                          options: ['left', 'center', 'right', 'justify'],
+                      },
+                      
+                      extraPlugins: [uploadPlugin]            // 업로드 플러그인
+                  }}
+                  data=""         // ⭐ 기존 컨텐츠 내용 입력 (HTML)
+                  onReady={ editor => {
+                      // You can store the "editor" and use when it is needed.
+                      console.log( 'Editor is ready to use!', editor );
+                  } }
+                  onChange={ ( event, editor ) => {
+                      const data = editor.getData();
+                      console.log( { event, editor, data } );
+                      setContent(data);
+                  } }
+                  onBlur={ ( event, editor ) => {
+                      console.log( 'Blur.', editor );
+                  } }
+                  onFocus={ ( event, editor ) => {
+                      console.log( 'Focus.', editor );
+                  } }
+                  />
               </td>
             </tr>
             <tr>

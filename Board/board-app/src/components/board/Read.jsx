@@ -1,6 +1,9 @@
 import React from 'react'
 import { Link, useParams } from 'react-router-dom'
 import styles from './css/Read.module.css'
+// ckeditor5
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 const Read = ({board, fileList, onDownload}) => {
   
@@ -51,12 +54,19 @@ const Read = ({board, fileList, onDownload}) => {
             </tr>
             <tr>
               <td colSpan={2}>
-                <textarea
+                {/* <textarea
                   cols={40}
                   rows={10}
                   defaultValue={board.content ?? ''}
                   className={styles['form-input']} readOnly
-                ></textarea>
+                ></textarea> */}
+                <CKEditor editor={ ClassicEditor }
+                  data={ board.content }           // 조회할 데이터 컨텐츠 
+                  disabled={true}
+                  config={{
+                      toolbar: [],
+                  }}
+                />
               </td>
             </tr>
             <tr>

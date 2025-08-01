@@ -59,12 +59,24 @@ public class FileController {
         }
     }
     
-    @PostMapping()
-    public ResponseEntity<?> create(@RequestBody Files file) {
+    @PostMapping(value="", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> createJSON(@RequestBody Files file) {
         try {
-            boolean result = fileService.insert(file);
+            boolean result = fileService.upload(file);
             if ( result ) 
-                return new ResponseEntity<>("SUCCESS", HttpStatus.CREATED);
+                return new ResponseEntity<>(file, HttpStatus.CREATED);
+            else 
+                return new ResponseEntity<>("FIAL", HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> create(Files file) {
+        try {
+            boolean result = fileService.upload(file);
+            if ( result ) 
+                return new ResponseEntity<>(file, HttpStatus.CREATED);
             else 
                 return new ResponseEntity<>("FIAL", HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
@@ -127,13 +139,13 @@ public class FileController {
     // 썸네일 이미지
     @GetMapping("/img/{id}")
     public void thumbnailImg(@PathVariable("id") String id, HttpServletResponse response) throws Exception {
-        Files file = fileService.selectById("id");
+        Files file = fileService.selectById(id);
         String filePath = file != null ? file.getFilePath() : null;
 
         File imgFile;
         // 파일 경로가 null 또는 파일이 존재하지 않는 경우 ➡ no-image
         // org.springframework.cor.io.Resource
-        Resource resource = resourceLoader.getResource("classpath:/img/no-image.png");
+        Resource resource = resourceLoader.getResource("classpath:/static/noimage.png");
         if ( filePath == null || !(imgFile = new File(filePath)).exists()) { 
             imgFile = resource.getFile();
             filePath = imgFile.getPath();
@@ -175,12 +187,12 @@ public class FileController {
                 List<Files> list = fileService.listByParent(file);
                 return new ResponseEntity<>(list, HttpStatus.OK);
             }
-            // tpye : "MAIN" ➡ 메인파일 1개
+            // type : "MAIN" ➡ 메인파일 1개
             if (type.equals("MAIN")) { 
                 Files mainFile = fileService.selectByType(file);
                 return new ResponseEntity<>(mainFile, HttpStatus.OK);
             }
-            // tpye : "SUB", "?" ➡ 타입별 파일 목록
+            // type : "SUB", "?" ➡ 타입별 파일 목록
             else { 
                 List<Files> list = fileService.listByType(file);
                 return new ResponseEntity<>(list, HttpStatus.OK);

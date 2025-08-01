@@ -51,8 +51,9 @@ const ReadContainer = () => {
     <>
     <Read 
     board={board} 
-    fileList={fileList}/>
+    fileList={fileList}
     onDownload={onDownload}
+    />
     </>
   )
 }

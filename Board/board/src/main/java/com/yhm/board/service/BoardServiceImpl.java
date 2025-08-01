@@ -94,7 +94,7 @@ public class BoardServiceImpl implements BoardService {
         }
         
         List<MultipartFile> files = board.getFiles();
-        if( files != null && files.isEmpty()) { 
+        if( files != null && !files.isEmpty()) { 
             for (MultipartFile multipartFile : files) {
                 if( multipartFile.isEmpty() ) { 
                     continue;
@@ -154,18 +154,19 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     public boolean deleteById(String id) throws Exception {
-        // 게시글 삭제 
+        Boards board = boardMapper.selectById(id); // 삭제 전 미리 게시글 정보 조회
         int result = boardMapper.deleteById(id);
-        // 종속된 첨부파일 삭제
-        Boards board = boardMapper.selectById(id);
-        Long no = board.getNo();
-        Files file = new Files();
-        file.setPTable("boards");
-        file.setPNo(no);
-        int deleteCount = fileService.deleteByParent(file);
-        log.info(deleteCount + " 개의 파일이 삭제 되었습니다.");
+        if (board != null) {
+            Long no = board.getNo();
+            Files file = new Files();
+            file.setPTable("boards");
+            file.setPNo(no);
+            int deleteCount = fileService.deleteByParent(file);
+            log.info(deleteCount + " 개의 파일이 삭제 되었습니다.");
+        }
         return result > 0;
-     }
+    }
+
 
     @Override
     public boolean completeAll() throws Exception {

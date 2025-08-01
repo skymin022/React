@@ -21,3 +21,7 @@
 .table th { background-color: black; color: white;}
 .table th:nth-child(1), .table td:nth-child(1) { width: 20%;}
 .table th:nth-child(2), .table td:nth-child(2) { width: 80%;}
+
+.flex-box { 
+    display: flex;
+}

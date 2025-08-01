@@ -6,6 +6,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <!-- namespace="매퍼 인터페이스 경로" --> 
 <mapper namespace="com.yhm.board.mapper.FileMapper">
 
+
+
+
+
     <!-- 파일 목록 -->
     <select id="list" resultType="Files">
         SELECT *
@@ -43,7 +47,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <!-- 파일 등록 -->
-    <insert id="insert">
+    <insert id="insert" parameterType="Files" useGeneratedKeys="true" keyProperty="no">
         INSERT INTO files(
             id, p_table, p_no, 
             file_name, origin_name, file_path, file_size, 
